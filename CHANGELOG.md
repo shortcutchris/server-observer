@@ -11,4 +11,3 @@
 - eigenständiges 3D-App-Icon
 - Sparkle-2-Auto-Updates mit Ed25519-signiertem Appcast
 - Universal Binary, Developer-ID-Signatur und Apple-Notarisierung
-

@@ -21,4 +21,3 @@ final class UpdateController: ObservableObject {
         updaterController.checkForUpdates(nil)
     }
 }
-

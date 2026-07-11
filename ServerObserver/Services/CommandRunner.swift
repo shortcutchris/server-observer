@@ -37,4 +37,3 @@ enum CommandError: LocalizedError {
         }
     }
 }
-

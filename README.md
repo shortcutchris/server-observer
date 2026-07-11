@@ -55,4 +55,3 @@ Die Produkt- und Sicherheitsentscheidungen des MVP stehen in [SPEC.md](SPEC.md).
 ## Sicherheit
 
 Server Observer überwacht ausschließlich lokale Prozess- und Portinformationen. Es verwendet weder Mikrofon noch Bildschirmaufzeichnung und überträgt keine Serverdaten. Prozesse werden zunächst mit `SIGTERM` beendet; ein erzwungenes `SIGKILL` wird nur nach einer weiteren Bestätigung angeboten.
-

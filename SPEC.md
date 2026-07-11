@@ -43,4 +43,3 @@ Server Observer ist eine native macOS-Desktop-App, die lokale Entwicklungsserver
 - Swift 6, SwiftUI und AppKit-Brücke für das Fensterverhalten.
 - Native macOS-App ohne Electron oder Hintergrundserver.
 - Deployment Target macOS 14 oder neuer.
-
