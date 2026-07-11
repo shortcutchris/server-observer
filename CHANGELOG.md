@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 – 2026-07-11
+
+- vollflächig neu aufgebautes App-Icon ohne doppelte Kachel oder transparenten Außenrand
+- größeres Server-/Orbit-Motiv für bessere Erkennbarkeit in Dock, Finder und App-Umschalter
+- adaptives Icon-Composer-Asset für die native Darstellung unter macOS 26
+- klassisches ICNS-Fallback für macOS 14 und 15 aktualisiert
+
 ## 0.2.0 – 2026-07-11
 
 - mehrere frei wählbare Projektstammordner mit konfigurierbarer Scan-Tiefe
