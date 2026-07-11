@@ -1,0 +1,108 @@
+name: Signed Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Import Developer ID certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH="$RUNNER_TEMP/developer-id.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/server-observer.keychain-db"
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      - name: Build signed release
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          scripts/build_release.sh "$VERSION" "$GITHUB_RUN_NUMBER"
+
+      - name: Notarize and staple
+        env:
+          API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+          API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          echo "$API_KEY_BASE64" | base64 --decode > "$API_KEY_PATH"
+          NOTARY_RESULT="$(xcrun notarytool submit "dist/ServerObserver-$VERSION.zip" \
+            --key "$API_KEY_PATH" \
+            --key-id "$API_KEY_ID" \
+            --issuer "$API_ISSUER_ID" \
+            --wait \
+            --output-format json)"
+          echo "$NOTARY_RESULT"
+          test "$(echo "$NOTARY_RESULT" | plutil -extract status raw -o - -- -)" = "Accepted"
+          xcrun stapler staple dist/ServerObserver.app
+          xcrun stapler validate dist/ServerObserver.app
+          xattr -cr dist/ServerObserver.app
+          xcrun stapler validate dist/ServerObserver.app
+          rm "dist/ServerObserver-$VERSION.zip"
+          ditto -c -k --sequesterRsrc --keepParent \
+            dist/ServerObserver.app "dist/ServerObserver-$VERSION.zip"
+
+      - name: Generate signed Sparkle appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TOOLS=".build/ReleaseDerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"
+          mkdir release-feed
+          cp "dist/ServerObserver-$VERSION.zip" release-feed/
+          cp appcast.xml release-feed/appcast.xml
+          printf '# Server Observer %s\n\nSiehe GitHub Release Notes.\n' "$VERSION" \
+            > "release-feed/ServerObserver-$VERSION.md"
+          echo "$SPARKLE_PRIVATE_KEY" | "$TOOLS/generate_appcast" \
+            --ed-key-file - \
+            --download-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/$GITHUB_REF_NAME/" \
+            --release-notes-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/$GITHUB_REF_NAME/" \
+            --link "https://github.com/shortcutchris/server-observer" \
+            -o release-feed/appcast.xml \
+            release-feed
+          cp release-feed/appcast.xml "$RUNNER_TEMP/appcast.xml"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/ServerObserver-$VERSION.zip" \
+            "release-feed/ServerObserver-$VERSION.md" \
+            --title "Server Observer $VERSION" \
+            --generate-notes
+
+      - name: Publish appcast on main
+        run: |
+          git fetch origin main
+          git checkout main
+          cp "$RUNNER_TEMP/appcast.xml" appcast.xml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add appcast.xml
+          git diff --cached --quiet || git commit -m "Update appcast for $GITHUB_REF_NAME [skip ci]"
+          git push origin main
