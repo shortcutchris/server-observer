@@ -54,6 +54,21 @@ struct ProjectDescriptor: Identifiable, Hashable, Sendable {
     let name: String
     let rootID: UUID
     let markers: Set<ProjectMarker>
+    let recipe: ProjectRecipe
+
+    init(
+        path: String,
+        name: String,
+        rootID: UUID,
+        markers: Set<ProjectMarker>,
+        recipe: ProjectRecipe = ProjectRecipe()
+    ) {
+        self.path = path
+        self.name = name
+        self.rootID = rootID
+        self.markers = markers
+        self.recipe = recipe
+    }
 
     var id: String { path }
     var displayPath: String { PathUtilities.abbreviateHome(path) }
@@ -126,6 +141,7 @@ struct DockerContainer: Identifiable, Hashable, Sendable {
     let projectPath: String?
     let kind: DockerContainerKind
     let httpPort: Int?
+    var metrics: RuntimeMetrics? = nil
 
     var displayName: String { composeService ?? name }
     var isRunning: Bool { state == "running" || state == "restarting" }
@@ -169,6 +185,9 @@ struct MonitoredProject: Identifiable, Hashable, Sendable {
     let descriptor: ProjectDescriptor
     let servers: [LocalServer]
     let containers: [DockerContainer]
+    var gitStatus: GitStatus? = nil
+    var serviceHealth: [ServiceHealth] = []
+    var portConflicts: [PortConflict] = []
 
     var id: String { descriptor.id }
     var isActive: Bool { !servers.isEmpty || containers.contains(where: \.isActive) }

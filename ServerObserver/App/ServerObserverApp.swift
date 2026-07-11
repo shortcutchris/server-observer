@@ -10,6 +10,7 @@ struct ServerObserverApp: App {
             ServerDashboardView()
                 .environmentObject(appState)
                 .environmentObject(updateController)
+                .onOpenURL { appState.handleURL($0) }
         }
         .defaultSize(width: 470, height: 580)
         .windowResizability(.contentMinSize)
@@ -55,10 +56,27 @@ private struct MenuBarContent: View {
                     }
                     .disabled(container.browserURL == nil)
                 }
+                Divider()
+                if project.descriptor.recipe.canStart {
+                    Button("Neu starten") { appState.restart(project) }
+                }
+                Button("Projekt stoppen", role: .destructive) { appState.requestStop(project) }
             }
         }
         if appState.activeProjectCount == 0 {
             Text("Keine aktiven Projekte")
+        }
+        let startable = appState.projects.filter { !$0.isActive && $0.descriptor.recipe.canStart }
+        if !startable.isEmpty {
+            Menu("Projekt starten") {
+                ForEach(startable.prefix(12)) { project in
+                    Button(project.descriptor.name) { appState.start(project) }
+                }
+            }
+        }
+        if appState.unhealthyServiceCount > 0 || appState.portConflictCount > 0 {
+            Divider()
+            Text("\(appState.unhealthyServiceCount) Health-Fehler · \(appState.portConflictCount) Portkonflikte")
         }
         Divider()
         Button("Panel öffnen") { openWindow(id: "main") }

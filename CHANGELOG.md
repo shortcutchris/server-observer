@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 – 2026-07-11
+
+- Projektrezepte mit automatischer Erkennung und `.server-observer.yml`
+- Start, Stop, Neustart und frei definierbare Projektprofile
+- CPU-, RAM-, Netzwerk-, Laufzeit- und Docker-Metriken
+- HTTP-Healthchecks und Erkennung erwarteter, bereits belegter Ports
+- Git-Status mit Branch, Änderungen, Ahead/Behind und letztem Commit
+- integrierte Projektlogs und persistenter lokaler Aktivitätsverlauf
+- optionale macOS-Mitteilungen für Health- und Portereignisse
+- erweiterte Menüleistensteuerung, Apple Kurzbefehle, URL-Scheme und installierbare CLI
+- neue Übersichts-, Logs- und Verlaufsansichten im aufziehbaren Projektdetail
+
 ## 0.2.1 – 2026-07-11
 
 - vollflächig neu aufgebautes App-Icon ohne doppelte Kachel oder transparenten Außenrand

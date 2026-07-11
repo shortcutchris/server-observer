@@ -1,0 +1,24 @@
+# Diese Datei als .server-observer.yml in den Projektstamm kopieren.
+name: Mein Projekt
+start: pnpm dev
+stop: pnpm stop
+restart: pnpm restart
+logs: tail -n 250 logs/dev.log
+health: http://localhost:3000/api/health
+ports: [3000, 5432]
+notifications: true
+
+profiles:
+  Frontend:
+    start: pnpm dev:web
+    stop: pnpm stop:web
+  Full Stack:
+    start: docker compose up -d
+    stop: docker compose stop
+
+services:
+  Web App:
+    url: http://localhost:3000
+    health: http://localhost:3000/api/health
+  Admin UI:
+    url: http://localhost:8080

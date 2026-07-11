@@ -11,11 +11,68 @@ struct AppSettingsView: View {
                 .environmentObject(appState)
                 .tabItem { Label("Projekte", systemImage: "folder") }
 
+            ControlCenterSettingsView()
+                .environmentObject(appState)
+                .tabItem { Label("Steuerung", systemImage: "switch.2") }
+
             UpdateSettingsView()
                 .environmentObject(updateController)
                 .tabItem { Label("Updates", systemImage: "arrow.triangle.2.circlepath") }
         }
         .frame(width: 640, height: 450)
+    }
+}
+
+private struct ControlCenterSettingsView: View {
+    @EnvironmentObject private var appState: AppState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Developer Control Center").font(.title2.bold())
+                Text("Automationen, Meldungen und lokale Integrationen für deine Projekte.")
+                    .foregroundStyle(.secondary)
+            }
+
+            GroupBox("Mitteilungen") {
+                Toggle(
+                    "Bei Health-Fehlern, Erholung und Portkonflikten informieren",
+                    isOn: Binding(
+                        get: { appState.notificationsEnabled },
+                        set: { appState.setNotificationsEnabled($0) }
+                    )
+                )
+                .padding(.vertical, 5)
+            }
+
+            GroupBox("Terminal & Automationen") {
+                VStack(alignment: .leading, spacing: 9) {
+                    Text("Installiert den Befehl nach ~/.local/bin/server-observer. Beispiele:")
+                        .foregroundStyle(.secondary)
+                    Text("server-observer refresh\nserver-observer start \"Mein Projekt\"\nserver-observer restart \"Mein Projekt\"")
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                    Button("CLI installieren", systemImage: "terminal") { appState.installCLI() }
+                        .buttonStyle(.borderedProminent)
+                    Text("Die gleichen Aktionen stehen in Apple Kurzbefehle bereit.")
+                        .font(.caption).foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 5)
+            }
+
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Lokalen Verlauf löschen").font(.headline)
+                    Text("Entfernt ausschließlich die gespeicherten Aktivitätsereignisse.").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Verlauf löschen", role: .destructive) { appState.clearActivity() }
+            }
+
+            Spacer()
+        }
+        .padding(24)
     }
 }
 

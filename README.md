@@ -18,6 +18,12 @@ Die aktuelle notarisierten Universal-App für Apple Silicon und Intel gibt es un
 - automatische Zuordnung lokaler Prozesse über ihr Arbeitsverzeichnis
 - Docker-Container inklusive Status, Healthcheck, Image, Service, Bind-Mounts und internen oder veröffentlichten Ports
 - Container ohne Webserver, etwa PostgreSQL, Worker oder Dev-Container, bleiben sichtbar
+- Start-, Stopp- und Neustartrezepte für Compose, Node.js, Swift, Go und Rust sowie frei definierbare Projektprofile
+- optionale `.server-observer.yml` je Projekt für Befehle, erwartete Ports, Services, Healthchecks und Benachrichtigungen
+- Live-Metriken für CPU, Arbeitsspeicher, Netzwerk, Prozessanzahl und Laufzeit
+- Git-Branch, Änderungen, Ahead/Behind und letzter Commit direkt im Projektdetail
+- automatische HTTP-Healthchecks und intelligente Warnungen bei belegten Projektports
+- integrierte Logs und ein ausschließlich lokal persistierter Aktivitätsverlauf
 - responsive Kartenansicht sowie Projektliste mit Detailspalte
 - Suche und Filter für aktive Projekte, Webserver, Container und nicht zugeordnete Laufzeiten
 - Browser- und Finder-Aktionen
@@ -25,6 +31,7 @@ Die aktuelle notarisierten Universal-App für Apple Silicon und Intel gibt es un
 - Docker-Container starten und kontrolliert stoppen; komplettes Projekt nach Bestätigung stoppen
 - Fensterverhalten: Desktop, schwebend oder normal
 - Menüleistensteuerung
+- Apple-Kurzbefehle, `serverobserver://`-URL-Aktionen und optionale Terminal-CLI
 - automatisches, kryptografisch signiertes Update-System mit Sparkle 2
 - Apple Developer ID, Hardened Runtime und Notarisierung für öffentliche Builds
 
@@ -57,6 +64,38 @@ Die gebaute Debug-App liegt anschließend unter:
 
 Die Produkt- und Sicherheitsentscheidungen des MVP stehen in [SPEC.md](SPEC.md). Der Veröffentlichungsprozess ist in [RELEASING.md](RELEASING.md) dokumentiert.
 
+## Projekt konfigurieren
+
+Automatisch erkannte Startbefehle können im Projektstamm mit `.server-observer.yml` ergänzt oder überschrieben werden:
+
+```yaml
+name: Mein Full-Stack-Projekt
+start: pnpm dev
+stop: pnpm stop
+restart: pnpm restart
+logs: tail -n 250 logs/dev.log
+health: http://localhost:3000/api/health
+ports: [3000, 5432]
+notifications: true
+
+profiles:
+  Frontend:
+    start: pnpm dev:web
+    stop: pnpm stop:web
+  Full Stack:
+    start: docker compose up -d
+    stop: docker compose stop
+
+services:
+  Web App:
+    url: http://localhost:3000
+    health: http://localhost:3000/api/health
+  Admin UI:
+    url: http://localhost:8080
+```
+
+Eine kommentierte Vorlage liegt unter [`.server-observer.example.yml`](.server-observer.example.yml). Die CLI kann in den App-Einstellungen nach `~/.local/bin/server-observer` installiert werden.
+
 ## Sicherheit
 
-Server Observer liest ausschließlich lokale Dateisystem-Metadaten, Prozess- und Portinformationen sowie den lokalen Docker-Status. Es verwendet weder Mikrofon noch Bildschirmaufzeichnung und überträgt keine Projekt- oder Serverdaten. Prozesse und Container werden nur nach einer ausdrücklichen Aktion beendet.
+Server Observer liest ausschließlich lokale Dateisystem-Metadaten, Prozess-, Netzwerk- und Portinformationen, Git-Metadaten sowie den lokalen Docker-Status. Healthchecks richten sich nur an die vom Projekt angegebenen URLs. Es verwendet weder Mikrofon noch Bildschirmaufzeichnung und überträgt keine Projekt- oder Serverdaten. Prozesse und Container werden nur nach einer ausdrücklichen Aktion beendet.
