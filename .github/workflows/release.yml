@@ -1,9 +1,12 @@
 name: Signed Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (for example v0.2.0)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -15,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag }}
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -37,7 +41,8 @@ jobs:
 
       - name: Build signed release
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ inputs.tag }}"
+          VERSION="${VERSION#v}"
           scripts/build_release.sh "$VERSION" "$GITHUB_RUN_NUMBER"
 
       - name: Notarize and staple
@@ -46,7 +51,8 @@ jobs:
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ inputs.tag }}"
+          VERSION="${VERSION#v}"
           API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
           echo "$API_KEY_BASE64" | base64 --decode > "$API_KEY_PATH"
           NOTARY_RESULT="$(xcrun notarytool submit "dist/ServerObserver-$VERSION.zip" \
@@ -69,7 +75,8 @@ jobs:
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ inputs.tag }}"
+          VERSION="${VERSION#v}"
           TOOLS=".build/ReleaseDerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"
           mkdir release-feed
           cp "dist/ServerObserver-$VERSION.zip" release-feed/
@@ -78,8 +85,8 @@ jobs:
             > "release-feed/ServerObserver-$VERSION.md"
           echo "$SPARKLE_PRIVATE_KEY" | "$TOOLS/generate_appcast" \
             --ed-key-file - \
-            --download-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/$GITHUB_REF_NAME/" \
-            --release-notes-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/$GITHUB_REF_NAME/" \
+            --download-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/${{ inputs.tag }}/" \
+            --release-notes-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/${{ inputs.tag }}/" \
             --link "https://github.com/shortcutchris/server-observer" \
             -o release-feed/appcast.xml \
             release-feed
@@ -89,8 +96,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          gh release create "$GITHUB_REF_NAME" \
+          VERSION="${{ inputs.tag }}"
+          VERSION="${VERSION#v}"
+          gh release create "${{ inputs.tag }}" \
             "dist/ServerObserver-$VERSION.zip" \
             "release-feed/ServerObserver-$VERSION.md" \
             --title "Server Observer $VERSION" \
@@ -104,5 +112,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add appcast.xml
-          git diff --cached --quiet || git commit -m "Update appcast for $GITHUB_REF_NAME [skip ci]"
+          git diff --cached --quiet || git commit -m "Update appcast for ${{ inputs.tag }} [skip ci]"
           git push origin main

@@ -33,12 +33,19 @@ if [[ -n "$API_KEY" && -n "$API_KEY_ID" && -n "$API_ISSUER_ID" && -f "$API_KEY" 
   printf '%s\n' "$NOTARY_RESULT"
   NOTARY_STATUS="$(printf '%s' "$NOTARY_RESULT" | plutil -extract status raw -o - -- -)"
   [[ "$NOTARY_STATUS" == "Accepted" ]] || { echo "✗ Apple-Notarisierung: $NOTARY_STATUS"; exit 1; }
-  xcrun stapler staple "$APP"
-  xcrun stapler validate "$APP"
-  xattr -cr "$APP"
-  xcrun stapler validate "$APP"
+
+  NOTARY_WORK="$(mktemp -d "${TMPDIR:-/tmp}/server-observer-notary.XXXXXX")"
+  ditto -x -k "$ARCHIVE" "$NOTARY_WORK"
+  STAPLE_APP="$NOTARY_WORK/ServerObserver.app"
+  xcrun stapler staple "$STAPLE_APP"
+  xcrun stapler validate "$STAPLE_APP"
+  xattr -cr "$STAPLE_APP"
+  xcrun stapler validate "$STAPLE_APP"
   rm -f "$ARCHIVE"
-  ditto -c -k --sequesterRsrc --keepParent "$APP" "$ARCHIVE"
+  ditto -c -k --sequesterRsrc --keepParent "$STAPLE_APP" "$ARCHIVE"
+  rm -rf "$APP"
+  ditto "$STAPLE_APP" "$APP"
+  rm -rf "$NOTARY_WORK"
 else
   echo "⚠ Notarisierung übersprungen: API-Key oder Developer-ID-Signatur fehlt."
 fi
@@ -51,7 +58,7 @@ cp "$ROOT/appcast.xml" "$FEED_DIR/appcast.xml"
 if [[ -n "$NOTES_SOURCE" ]]; then
   cp "$NOTES_SOURCE" "$FEED_DIR/ServerObserver-$VERSION.md"
 else
-  printf '# Server Observer %s\n\nErste öffentliche Version von Server Observer.\n' "$VERSION" \
+  printf '# Server Observer %s\n\nNeue Version von Server Observer.\n' "$VERSION" \
     > "$FEED_DIR/ServerObserver-$VERSION.md"
 fi
 

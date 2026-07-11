@@ -25,9 +25,9 @@ struct ServerObserverApp: App {
         .menuBarExtraStyle(.menu)
 
         Settings {
-            UpdateSettingsView()
+            AppSettingsView()
+                .environmentObject(appState)
                 .environmentObject(updateController)
-                .frame(width: 420)
         }
     }
 }
@@ -36,54 +36,37 @@ private struct MenuBarContent: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var updateController: UpdateController
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        Text("\(appState.webServerCount) Webserver aktiv")
+        Text("\(appState.activeProjectCount) Projekte · \(appState.activeContainerCount) Container · \(appState.servers.count) Prozesse")
         Divider()
-        ForEach(appState.servers.filter { $0.kind == .web }.prefix(6)) { server in
-            Button("\(server.displayName) – :\(server.primaryPort)") {
-                appState.open(server)
+        ForEach(appState.projects.filter(\.isActive).prefix(6)) { project in
+            Menu(project.descriptor.name) {
+                ForEach(project.servers.prefix(6)) { server in
+                    Button("\(server.displayName) – :\(server.primaryPort)") {
+                        appState.open(server)
+                    }
+                    .disabled(server.browserURL == nil)
+                }
+                ForEach(project.containers.filter(\.isActive).prefix(6)) { container in
+                    Button("\(container.displayName) – \(container.portsLabel)") {
+                        appState.open(container)
+                    }
+                    .disabled(container.browserURL == nil)
+                }
             }
         }
-        if appState.webServerCount == 0 {
-            Text("Keine Webserver gefunden")
+        if appState.activeProjectCount == 0 {
+            Text("Keine aktiven Projekte")
         }
         Divider()
         Button("Panel öffnen") { openWindow(id: "main") }
+        Button("Projektordner …") { openSettings() }
         Button("Jetzt aktualisieren") { Task { await appState.refresh() } }
         Button("Nach App-Updates suchen …") { updateController.checkForUpdates() }
             .disabled(!updateController.canCheckForUpdates)
         Divider()
         Button("Server Observer beenden") { NSApplication.shared.terminate(nil) }
-    }
-}
-
-private struct UpdateSettingsView: View {
-    @EnvironmentObject private var updateController: UpdateController
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 14) {
-                Image(nsImage: NSApplication.shared.applicationIconImage)
-                    .resizable()
-                    .frame(width: 64, height: 64)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Server Observer")
-                        .font(.title2.bold())
-                    Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–")")
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Text("Server Observer prüft automatisch den signierten Release-Feed auf neue Versionen.")
-                .foregroundStyle(.secondary)
-
-            Button("Nach Updates suchen …") {
-                updateController.checkForUpdates()
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(!updateController.canCheckForUpdates)
-        }
-        .padding(24)
     }
 }

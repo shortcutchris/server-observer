@@ -6,8 +6,11 @@ VERSION="${1:-0.1.0}"
 BUILD_NUMBER="${2:-1}"
 DERIVED_DATA="$ROOT/.build/ReleaseDerivedData"
 DIST="$ROOT/dist"
-APP="$DIST/ServerObserver.app"
+OUTPUT_APP="$DIST/ServerObserver.app"
 ARCHIVE="$DIST/ServerObserver-$VERSION.zip"
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/server-observer-release.XXXXXX")"
+APP="$WORK_DIR/ServerObserver.app"
+trap 'rm -rf "$WORK_DIR"' EXIT
 SIGNING_IDENTITY="${SIGNING_IDENTITY:-}"
 if [[ -z "$SIGNING_IDENTITY" ]]; then
   SIGNING_IDENTITY="$(security find-identity -v -p codesigning \
@@ -16,7 +19,7 @@ if [[ -z "$SIGNING_IDENTITY" ]]; then
 fi
 
 mkdir -p "$DIST"
-rm -rf "$APP" "$ARCHIVE"
+rm -rf "$OUTPUT_APP" "$ARCHIVE"
 
 cd "$ROOT"
 xcodegen generate
@@ -50,14 +53,19 @@ if [[ "$SIGNED_BUILD" == "1" ]]; then
 
   # Swift Package Manager signs Sparkle on copy, but not all nested helpers for
   # Developer-ID distribution. Sparkle's documented inside-out order is required.
+  xattr -cr "$APP"
   codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" \
     "$SPARKLE_VERSION/XPCServices/Installer.xpc"
+  xattr -cr "$APP"
   codesign --force --options runtime --timestamp --preserve-metadata=entitlements \
     --sign "$SIGNING_IDENTITY" "$SPARKLE_VERSION/XPCServices/Downloader.xpc"
+  xattr -cr "$APP"
   codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" \
     "$SPARKLE_VERSION/Autoupdate"
+  xattr -cr "$APP"
   codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" \
     "$SPARKLE_VERSION/Updater.app"
+  xattr -cr "$APP"
   codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$SPARKLE"
   # File-provider metadata can be reattached while nested bundles are read.
   # Clear it again before sealing the outer application bundle.
@@ -70,7 +78,8 @@ if [[ "$SIGNED_BUILD" == "1" ]]; then
   codesign --verify --deep --strict --verbose=2 "$APP"
 fi
 
+ditto "$APP" "$OUTPUT_APP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ARCHIVE"
 
-echo "✓ App: $APP"
+echo "✓ App: $OUTPUT_APP"
 echo "✓ Update-Archiv: $ARCHIVE"

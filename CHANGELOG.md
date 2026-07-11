@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 – 2026-07-11
+
+- mehrere frei wählbare Projektstammordner mit konfigurierbarer Scan-Tiefe
+- automatische Erkennung von Git-, Compose-, Dev-Container- und Sprachprojekten
+- projektzentriertes Dashboard für schmale und breite Fenster
+- Zuordnung lokaler TCP-Prozesse anhand ihres Arbeitsverzeichnisses
+- Docker- und Dev-Container mit Status, Healthcheck, Image, Ports und Bind-Mounts
+- Visualisierung von Datenbanken, Workern und Containern ohne veröffentlichten Webport
+- Start- und Stopp-Aktionen für Container sowie „Alles stoppen“ je Projekt
+- neue Filter für Projekte, Webserver, Container und nicht zugeordnete Laufzeiten
+- Projektordner- und Docker-Einstellungen sowie erweiterte Menüleistenübersicht
+
 ## 0.1.0 – 2026-07-11
 
 - erste öffentliche macOS-Version

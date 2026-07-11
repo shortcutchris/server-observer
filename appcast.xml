@@ -6,6 +6,16 @@
         <description>Signierte Updates für Server Observer.</description>
         <language>de</language>
         <item>
+            <title>0.2.0</title>
+            <pubDate>Sat, 11 Jul 2026 19:11:40 +0200</pubDate>
+            <link>https://github.com/shortcutchris/server-observer</link>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://github.com/shortcutchris/server-observer/releases/download/v0.2.0/ServerObserver-0.2.0.md</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/shortcutchris/server-observer/releases/download/v0.2.0/ServerObserver-0.2.0.zip" length="4429346" type="application/octet-stream" sparkle:edSignature="ttLgmLRjlsI0nGtnbyAYZ9S039NXT9FKBpT1s6TPxuARGgsvIwyaRy5v0mxCVJpzIP5Jf6F1Z3MLGrLUxQ2+AQ=="/>
+        </item>
+        <item>
             <title>0.1.0</title>
             <pubDate>Sat, 11 Jul 2026 18:42:03 +0200</pubDate>
             <link>https://github.com/shortcutchris/server-observer</link>
