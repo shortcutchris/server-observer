@@ -5,20 +5,18 @@ enum CommandRunner {
         try await Task.detached(priority: .utility) {
             let process = Process()
             let output = Pipe()
-            let errors = Pipe()
 
             process.executableURL = URL(fileURLWithPath: executable)
             process.arguments = arguments
             process.standardOutput = output
-            process.standardError = errors
+            process.standardError = output
 
             try process.run()
             let data = output.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
 
-            guard process.terminationStatus == 0 || !data.isEmpty else {
-                let errorData = errors.fileHandleForReading.readDataToEndOfFile()
-                let message = String(decoding: errorData, as: UTF8.self)
+            guard process.terminationStatus == 0 else {
+                let message = String(decoding: data, as: UTF8.self)
                 throw CommandError.failed(executable: executable, message: message)
             }
 

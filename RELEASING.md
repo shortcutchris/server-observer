@@ -7,7 +7,7 @@ Server Observer verwendet Sparkle 2.9.2. Updates werden sowohl durch Apple Devel
 ```sh
 cp release.env.example .release.env
 # `.release.env` einmalig mit den lokalen Apple-Werten ausfüllen
-scripts/publish_update.sh 0.1.0 1
+scripts/publish_update.sh 0.2.0 2 release-notes.md
 ```
 
 Der Ablauf:
@@ -23,7 +23,7 @@ Danach werden ZIP, Release Notes und der aktualisierte Appcast gemeinsam committ
 
 ## Automatische GitHub-Releases
 
-Der Workflow `.github/workflows/release.yml` startet bei einem Tag wie `v0.2.0`. Vor dem ersten automatischen Release müssen diese Repository-Secrets gesetzt werden:
+Der Workflow `.github/workflows/release.yml` wird bei Bedarf manuell mit einem vorhandenen Tag wie `v0.2.0` gestartet. Vor dem ersten automatisierten Release müssen diese Repository-Secrets gesetzt werden:
 
 - `MACOS_CERTIFICATE_BASE64`
 - `MACOS_CERTIFICATE_PASSWORD`
