@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011B99A9D9D66014EA3B3F04 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D1A1678C31FCCB3D7D7BC09F /* AppIcon.icon */; };
 		0DB23DA19E0F985ABDE7F38F /* CommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F441AE54F3BA3B107D75274 /* CommandRunner.swift */; };
 		1D93862537F041831E089DCD /* LocalServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAE242C621B58D1EB878532 /* LocalServer.swift */; };
 		290719D8996D928287134048 /* ServerScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE52E54C30AD3A364071FA8 /* ServerScannerTests.swift */; };
@@ -52,6 +53,7 @@
 		7EB62E1FA42E98F9B50B5140 /* ServerObserverRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ServerObserverRelease.entitlements; sourceTree = "<group>"; };
 		A023A7DA6E5E55087B597CEF /* DockerClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockerClient.swift; sourceTree = "<group>"; };
 		CBF76AECCEC2A4030C8476C4 /* ProjectScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectScannerTests.swift; sourceTree = "<group>"; };
+		D1A1678C31FCCB3D7D7BC09F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DD8F64A5B47AD61031489EC1 /* ServerObserver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ServerObserver.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBE52E54C30AD3A364071FA8 /* ServerScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerScannerTests.swift; sourceTree = "<group>"; };
 		EC4B266E163D4745BC594E2F /* AppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsView.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				175DCCBC5CDC81AF59CD26FD /* ServerObserver.entitlements */,
 				7EB62E1FA42E98F9B50B5140 /* ServerObserverRelease.entitlements */,
 				D545CA3A2702886977C0D792 /* App */,
+				B85D7A48871FE73FDA9276AD /* Assets */,
 				6F5B6B0AA314FB55776E10CA /* Models */,
 				142A17C2D2E523BA35909A1B /* Services */,
 				09F4A77D6E6D55257A2AD4C4 /* Views */,
@@ -123,6 +126,14 @@
 				FD76634DC2B1BEA7E7EB474B /* ProjectModels.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		B85D7A48871FE73FDA9276AD /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				D1A1678C31FCCB3D7D7BC09F /* AppIcon.icon */,
+			);
+			path = Assets;
 			sourceTree = "<group>";
 		};
 		C703C3813F5FB72FE1D192DA = {
@@ -239,6 +250,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011B99A9D9D66014EA3B3F04 /* AppIcon.icon in Resources */,
 				4EC55B6B39C9C98B99788F25 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,14 +305,14 @@
 				CODE_SIGN_ENTITLEMENTS = ServerObserver/ServerObserverRelease.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ServerObserver/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.serverobserver.app;
 				PRODUCT_NAME = ServerObserver;
 				SDKROOT = macosx;
@@ -456,14 +468,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ServerObserver/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.serverobserver.app;
 				PRODUCT_NAME = ServerObserver;
 				SDKROOT = macosx;
