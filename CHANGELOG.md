@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 – 2026-07-12
+
+- zentraler „Frontend öffnen“-Button auf Projektkarten und in der Detailansicht
+- Auswahlmenü für Projekte mit mehreren Weboberflächen
+- „Starten & öffnen“ für gestoppte Projekte mit bis zu 30 Sekunden Bereitschaftsprüfung
+- automatische Ziele aus konfigurierten Services, lokalen HTTP-Prozessen und Web-Containern
+- `frontend: true` zur Kennzeichnung des bevorzugten Services
+- Frontend-Schnellzugriff in der Menüleiste
+
 ## 0.3.0 – 2026-07-11
 
 - Projektrezepte mit automatischer Erkennung und `.server-observer.yml`

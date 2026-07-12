@@ -20,5 +20,6 @@ services:
   Web App:
     url: http://localhost:3000
     health: http://localhost:3000/api/health
+    frontend: true
   Admin UI:
     url: http://localhost:8080

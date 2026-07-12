@@ -194,6 +194,7 @@ private struct ProjectCard: View {
             HStack {
                 Button("Finder", systemImage: "folder") { appState.reveal(project) }
                     .controlSize(.small)
+                ProjectBrowserButton(project: project, compact: true)
                 Spacer()
                 ProjectActionButtons(project: project, compact: true)
             }
@@ -470,6 +471,53 @@ private struct ProjectActionButtons: View {
     }
 }
 
+private struct ProjectBrowserButton: View {
+    @EnvironmentObject private var appState: AppState
+    let project: MonitoredProject
+    var compact = false
+
+    private var targets: [ProjectBrowserTarget] { project.browserTargets }
+    private var isBusy: Bool { appState.busyFrontendProjectIDs.contains(project.id) }
+    private var title: String {
+        if project.isActive { return compact ? "Frontend" : "Frontend öffnen" }
+        return compact ? "Start & öffnen" : "Starten & öffnen"
+    }
+
+    var body: some View {
+        Group {
+            if isBusy {
+                HStack(spacing: 5) {
+                    ProgressView().controlSize(.small)
+                    if !compact { Text("Warte auf Frontend …") }
+                }
+            } else if targets.count > 1 {
+                Menu {
+                    ForEach(targets) { target in
+                        Button {
+                            appState.openFrontend(project, target: target)
+                        } label: {
+                            Label("\(target.name) · \(target.addressLabel)", systemImage: target.isPreferred ? "star.fill" : "safari")
+                        }
+                    }
+                } label: {
+                    Label(title, systemImage: "safari")
+                }
+            } else {
+                Button {
+                    appState.openFrontend(project, target: targets.first)
+                } label: {
+                    Label(title, systemImage: project.isActive ? "safari" : "play.rectangle.fill")
+                }
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(compact ? .small : .regular)
+        .tint(.blue)
+        .disabled(isBusy || (targets.isEmpty && !project.descriptor.recipe.canStart))
+        .help(project.isActive ? "Projekt-Frontend im Standardbrowser öffnen" : "Projekt starten und Frontend öffnen")
+    }
+}
+
 private struct UnassignedCard: View {
     let servers: [LocalServer]
     let containers: [DockerContainer]
@@ -582,6 +630,7 @@ private struct ProjectDetailView: View {
 
                 HStack {
                     Button("Im Finder", systemImage: "folder") { appState.reveal(project) }
+                    ProjectBrowserButton(project: project)
                     Spacer()
                     ProjectActionButtons(project: project)
                 }

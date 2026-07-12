@@ -23,6 +23,7 @@ final class ControlCenterTests: XCTestCase {
               Frontend:
                 url: http://localhost:3000/#ready
                 health: http://localhost:3000/api/health
+                frontend: true
               Database UI:
                 url: http://localhost:8080
             """
@@ -34,8 +35,43 @@ final class ControlCenterTests: XCTestCase {
         XCTAssertEqual(recipe.notificationsEnabled, false)
         XCTAssertEqual(recipe.profiles.map(\.name), ["Web only", "Full stack"])
         XCTAssertEqual(recipe.services.first?.url, "http://localhost:3000/#ready")
+        XCTAssertEqual(recipe.services.first?.isFrontend, true)
         XCTAssertEqual(recipe.services.last?.port, 8080)
         XCTAssertEqual(recipe.source, .configuration)
+    }
+
+    func testBuildsDeduplicatedBrowserTargetsAndPrefersConfiguredFrontend() {
+        let recipe = ProjectRecipe(
+            services: [
+                ProjectService(name: "Admin", url: "http://localhost:8080"),
+                ProjectService(name: "Web App", url: "http://localhost:3000", isFrontend: true)
+            ]
+        )
+        let descriptor = ProjectDescriptor(
+            path: "/tmp/browser-targets",
+            name: "Browser Targets",
+            rootID: UUID(),
+            markers: [.node],
+            recipe: recipe
+        )
+        let server = LocalServer(
+            pid: 99,
+            processName: "node",
+            displayName: "Vite",
+            runtime: "Node.js",
+            command: "vite",
+            workingDirectory: descriptor.path,
+            ports: [3000],
+            hosts: ["127.0.0.1"],
+            kind: .web,
+            isHTTP: true,
+            ownerUID: 501
+        )
+        let project = MonitoredProject(descriptor: descriptor, servers: [server], containers: [])
+
+        XCTAssertEqual(project.browserTargets.count, 2)
+        XCTAssertEqual(project.primaryBrowserTarget?.name, "Web App")
+        XCTAssertEqual(project.browserTargets.map(\.addressLabel), ["localhost:3000", "localhost:8080"])
     }
 
     func testParsesProcessAndNetworkMetrics() {

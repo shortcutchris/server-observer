@@ -42,6 +42,7 @@ Server Observer ist eine native macOS-Desktop-App, die lokale Entwicklungsprojek
 - Alle lokalen Prozesse und laufenden Container eines Projekts gesammelt stoppen.
 - Projektrezepte automatisch erkennen oder über `.server-observer.yml` konfigurieren.
 - Projekte und Profile starten, stoppen und neu starten; Ausgaben in lokale Logdateien schreiben.
+- Das bevorzugte Projekt-Frontend direkt öffnen oder ein gestopptes Projekt starten, auf HTTP-Bereitschaft warten und anschließend öffnen.
 - Aktionen über Menüleiste, `serverobserver://`-URLs, Apple Kurzbefehle und eine optionale CLI auslösen.
 
 ## Developer Control Center

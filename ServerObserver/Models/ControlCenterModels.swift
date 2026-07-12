@@ -42,11 +42,39 @@ struct ProjectService: Codable, Hashable, Identifiable, Sendable {
     var name: String
     var url: String
     var healthURL: String?
+    var isFrontend: Bool?
+
+    init(name: String, url: String, healthURL: String? = nil, isFrontend: Bool? = nil) {
+        self.name = name
+        self.url = url
+        self.healthURL = healthURL
+        self.isFrontend = isFrontend
+    }
 
     var id: String { name }
     var browserURL: URL? { URL(string: url) }
     var probeURL: URL? { URL(string: healthURL ?? url) }
     var port: Int? { browserURL?.port }
+}
+
+struct ProjectBrowserTarget: Identifiable, Hashable, Sendable {
+    enum Source: Hashable, Sendable {
+        case configuration
+        case localProcess
+        case docker
+    }
+
+    let name: String
+    let url: URL
+    let source: Source
+    let isPreferred: Bool
+
+    var id: String { normalizedURL }
+    var normalizedURL: String { url.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/")) }
+    var addressLabel: String {
+        guard let host = url.host else { return url.absoluteString }
+        return url.port.map { "\(host):\($0)" } ?? host
+    }
 }
 
 struct ProjectRecipe: Codable, Hashable, Sendable {

@@ -35,6 +35,7 @@ final class AppState: ObservableObject {
     @Published private(set) var isScanning = false
     @Published private(set) var lastUpdated: Date?
     @Published private(set) var busyContainerIDs: Set<String> = []
+    @Published private(set) var busyFrontendProjectIDs: Set<String> = []
     @Published private(set) var actionStates: [String: ProjectActionState] = [:]
     @Published private(set) var activity: [ActivityEvent] = []
     @Published private(set) var projectLogs: [String: ProjectLogSnapshot] = [:]
@@ -292,11 +293,43 @@ final class AppState: ObservableObject {
     }
 
     func start(_ project: MonitoredProject, profile: ProjectProfile? = nil) {
-        Task { await startProject(project, profile: profile) }
+        Task { _ = await startProject(project, profile: profile) }
     }
 
     func restart(_ project: MonitoredProject) {
         Task { await restartProject(project) }
+    }
+
+    func openFrontend(_ project: MonitoredProject, target: ProjectBrowserTarget? = nil) {
+        let selectedTarget = target ?? project.primaryBrowserTarget
+
+        if project.isActive, let selectedTarget {
+            NSWorkspace.shared.open(selectedTarget.url)
+            Task {
+                await record(
+                    project: project,
+                    kind: .info,
+                    message: "Frontend \(selectedTarget.name) geöffnet"
+                )
+            }
+            return
+        }
+
+        guard project.descriptor.recipe.canStart else {
+            if let selectedTarget {
+                NSWorkspace.shared.open(selectedTarget.url)
+            } else {
+                errorMessage = "Für \(project.descriptor.name) wurde noch kein Frontend erkannt oder konfiguriert."
+            }
+            return
+        }
+
+        Task {
+            busyFrontendProjectIDs.insert(project.id)
+            defer { busyFrontendProjectIDs.remove(project.id) }
+            guard await startProject(project, profile: nil) else { return }
+            await waitForFrontend(projectID: project.id, preferredTarget: selectedTarget)
+        }
     }
 
     func loadLogs(for project: MonitoredProject) {
@@ -564,11 +597,11 @@ final class AppState: ObservableObject {
         await refresh()
     }
 
-    private func startProject(_ project: MonitoredProject, profile: ProjectProfile?) async {
+    private func startProject(_ project: MonitoredProject, profile: ProjectProfile?) async -> Bool {
         let command = profile?.startCommand ?? project.descriptor.recipe.startCommand
         guard let command else {
             errorMessage = "Für \(project.descriptor.name) wurde kein Startbefehl erkannt. Lege ihn in .server-observer.yml fest."
-            return
+            return false
         }
         actionStates[project.id] = .starting
         defer { actionStates[project.id] = .idle }
@@ -586,8 +619,52 @@ final class AppState: ObservableObject {
             )
             try? await Task.sleep(for: .seconds(1.2))
             await refresh()
+            return true
         } catch {
             await report(error, project: project, action: "Starten")
+            return false
+        }
+    }
+
+    private func waitForFrontend(projectID: String, preferredTarget: ProjectBrowserTarget?) async {
+        let deadline = Date().addingTimeInterval(30)
+        var lastRefresh = Date.distantPast
+
+        while Date() < deadline {
+            if Date().timeIntervalSince(lastRefresh) >= 2 {
+                await refresh()
+                lastRefresh = Date()
+            }
+
+            guard let project = projects.first(where: { $0.id == projectID }) else { break }
+            let target = preferredTarget ?? project.primaryBrowserTarget
+            if let target, await frontendResponds(at: target.url) {
+                NSWorkspace.shared.open(target.url)
+                await record(project: project, kind: .info, message: "Frontend \(target.name) gestartet und geöffnet")
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(600))
+        }
+
+        errorMessage = "Das Frontend hat innerhalb von 30 Sekunden noch nicht geantwortet. Prüfe Startbefehl, URL und Logs."
+    }
+
+    private func frontendResponds(at url: URL) async -> Bool {
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        request.timeoutInterval = 0.9
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse else { return false }
+            if http.statusCode == 405 || http.statusCode == 501 {
+                request.httpMethod = "GET"
+                let (_, fallback) = try await URLSession.shared.data(for: request)
+                return fallback is HTTPURLResponse
+            }
+            return true
+        } catch {
+            return false
         }
     }
 

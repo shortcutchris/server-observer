@@ -57,6 +57,17 @@ private struct MenuBarContent: View {
                     .disabled(container.browserURL == nil)
                 }
                 Divider()
+                if project.browserTargets.count > 1 {
+                    Menu("Frontend öffnen") {
+                        ForEach(project.browserTargets) { target in
+                            Button("\(target.name) – \(target.addressLabel)") {
+                                appState.openFrontend(project, target: target)
+                            }
+                        }
+                    }
+                } else if project.primaryBrowserTarget != nil {
+                    Button("Frontend öffnen") { appState.openFrontend(project) }
+                }
                 if project.descriptor.recipe.canStart {
                     Button("Neu starten") { appState.restart(project) }
                 }

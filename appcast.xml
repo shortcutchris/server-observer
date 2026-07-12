@@ -6,6 +6,16 @@
         <description>Signierte Updates für Server Observer.</description>
         <language>de</language>
         <item>
+            <title>0.3.1</title>
+            <pubDate>Sun, 12 Jul 2026 10:49:59 +0200</pubDate>
+            <link>https://github.com/shortcutchris/server-observer</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://github.com/shortcutchris/server-observer/releases/download/v0.3.1/ServerObserver-0.3.1.md</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/shortcutchris/server-observer/releases/download/v0.3.1/ServerObserver-0.3.1.zip" length="7826284" type="application/octet-stream" sparkle:edSignature="5TXldMY2GBhGoWpCpIgj+apEJOewVwbwOxxTftqSZwMlMfkzZqSCpK0a7Za9J8wEOXuochLgmB2jbXj8zHqJBw=="/>
+        </item>
+        <item>
             <title>0.3.0</title>
             <pubDate>Sat, 11 Jul 2026 22:48:43 +0200</pubDate>
             <link>https://github.com/shortcutchris/server-observer</link>
@@ -24,16 +34,6 @@
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:releaseNotesLink>https://github.com/shortcutchris/server-observer/releases/download/v0.2.1/ServerObserver-0.2.1.md</sparkle:releaseNotesLink>
             <enclosure url="https://github.com/shortcutchris/server-observer/releases/download/v0.2.1/ServerObserver-0.2.1.zip" length="7223502" type="application/octet-stream" sparkle:edSignature="tS75JHGx/wwQ7/jEwRHz4Sdsu6zUOjyFYimjf3bj3HsDze09lMeIWEjJ9ctC4SMLvgFSfBCf4qxFDWGRhzu6Bw=="/>
-        </item>
-        <item>
-            <title>0.2.0</title>
-            <pubDate>Sat, 11 Jul 2026 19:11:40 +0200</pubDate>
-            <link>https://github.com/shortcutchris/server-observer</link>
-            <sparkle:version>2</sparkle:version>
-            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <sparkle:releaseNotesLink>https://github.com/shortcutchris/server-observer/releases/download/v0.2.0/ServerObserver-0.2.0.md</sparkle:releaseNotesLink>
-            <enclosure url="https://github.com/shortcutchris/server-observer/releases/download/v0.2.0/ServerObserver-0.2.0.zip" length="4429346" type="application/octet-stream" sparkle:edSignature="ttLgmLRjlsI0nGtnbyAYZ9S039NXT9FKBpT1s6TPxuARGgsvIwyaRy5v0mxCVJpzIP5Jf6F1Z3MLGrLUxQ2+AQ=="/>
         </item>
     </channel>
 </rss>
