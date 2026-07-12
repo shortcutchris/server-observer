@@ -11,7 +11,8 @@ Server Observer ist eine native macOS-Desktop-App, die lokale Entwicklungsprojek
 - Kompakte Projektkarten bei schmalem Fenster, Projektliste plus Detailspalte bei breitem Fenster.
 - Scrollbare Laufzeitlisten, Suche und Filter für aktive Projekte, alle Projekte, Webserver, Container und nicht zugeordnete Einträge.
 - Light/Dark Mode, systemnahe Materialien, SF Symbols und zugängliche Statusbeschriftungen.
-- Menüleisteneintrag zum Öffnen des Panels und für einen schnellen Überblick.
+- Menüleisteneintrag mit Projektstart, Neustart, Stoppen, Laufzeiten und Problemzähler.
+- Breiter Detailbereich mit Übersicht, Live-Metriken, Git, Healthchecks, Logs und Verlauf.
 
 ## Erkennung
 
@@ -39,13 +40,25 @@ Server Observer ist eine native macOS-Desktop-App, die lokale Entwicklungsprojek
 - Systemfremde oder nicht berechtigte Prozesse werden nicht ohne Weiteres beendet.
 - Docker-Container nach Bestätigung stoppen und gestoppte Container starten.
 - Alle lokalen Prozesse und laufenden Container eines Projekts gesammelt stoppen.
+- Projektrezepte automatisch erkennen oder über `.server-observer.yml` konfigurieren.
+- Projekte und Profile starten, stoppen und neu starten; Ausgaben in lokale Logdateien schreiben.
+- Aktionen über Menüleiste, `serverobserver://`-URLs, Apple Kurzbefehle und eine optionale CLI auslösen.
 
-## Nicht Teil der aktuellen Version
+## Developer Control Center
 
-- Neustart anhand des ursprünglichen Shell-Kontexts.
-- Persistenter Verlauf und Ressourcenmetriken.
-- VM-spezifische Steuerung außerhalb von Docker.
-- Auswertung von Logs oder Inhalten der überwachten Anwendungen.
+- CPU, RAM, Netzwerkvolumen, Prozessanzahl und Laufzeit lokaler Prozesse und Docker-Container.
+- Git-Branch, Working-Tree-Änderungen, Ahead/Behind, letzter Commit und Remote-URL.
+- HTTP-Healthchecks für konfigurierte Services oder automatisch erkannte Weblaufzeiten.
+- Prüfung erwarteter Ports gegen zugeordnete und nicht zugeordnete lokale Prozesse und Container.
+- Persistenter lokaler Verlauf für Start, Stop, Neustart, Fehler, Health-Übergänge und neue Portkonflikte.
+- Optionale macOS-Mitteilungen bei Health-Fehlern, Erholung und Portkonflikten.
+- Projektprofile mit jeweils eigenem Start- und Stop-Befehl.
+
+## Grenzen
+
+- Server Observer rekonstruiert keinen beliebigen ursprünglichen Shell-Kontext. Nicht automatisch erkennbare Projekte benötigen ein explizites Rezept.
+- VM-spezifische Steuerung außerhalb von Docker ist nicht enthalten.
+- Logs werden angezeigt, aber nicht semantisch ausgewertet oder an externe Dienste übertragen.
 
 ## Technische Basis
 

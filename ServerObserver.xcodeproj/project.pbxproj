@@ -8,19 +8,31 @@
 
 /* Begin PBXBuildFile section */
 		011B99A9D9D66014EA3B3F04 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D1A1678C31FCCB3D7D7BC09F /* AppIcon.icon */; };
+		0A322065C6411BA62989377E /* ProjectRecipeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16394DE78ED8DAE18A7C27B8 /* ProjectRecipeLoader.swift */; };
 		0DB23DA19E0F985ABDE7F38F /* CommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F441AE54F3BA3B107D75274 /* CommandRunner.swift */; };
 		1D93862537F041831E089DCD /* LocalServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAE242C621B58D1EB878532 /* LocalServer.swift */; };
 		290719D8996D928287134048 /* ServerScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE52E54C30AD3A364071FA8 /* ServerScannerTests.swift */; };
+		31DB6768222AD9D8F5AABE58 /* PortConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B72803DCAD22DE84458040 /* PortConflictDetector.swift */; };
 		4EC55B6B39C9C98B99788F25 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EC9CD1ECF13BFFF878B2FB39 /* Assets.xcassets */; };
 		4FEB4368B72F3FDD4C6ACFF4 /* ServerDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0481A45F1330433AAA1C4425 /* ServerDashboardView.swift */; };
 		507E314B192DDCD67F71DBCA /* DockerClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0A3769E4EE5FB92A391AFD /* DockerClientTests.swift */; };
 		530FEDCE46743A89506C70CF /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DACA057406FBB7D0BCCEA4C /* AppState.swift */; };
+		5ACC926DCDC421FFB061613B /* GitInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD654AC9A4DD2E12297CBBF3 /* GitInspector.swift */; };
 		628183641A06C0DDC326582A /* ServerObserverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D0778630AF1639708383DA /* ServerObserverApp.swift */; };
+		650E4FBD2C54D64CD8FE9818 /* ControlCenterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472708F3A804E65B57AF3DF9 /* ControlCenterModels.swift */; };
+		697C5D1E562D427167353D24 /* server-observer.sh in Resources */ = {isa = PBXBuildFile; fileRef = BED5A4D72E9B8486358C72C3 /* server-observer.sh */; };
 		735A1B589575D16A4138346A /* ProjectScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CC883E9C764CFDB102E593 /* ProjectScanner.swift */; };
 		792FC7950DE85D2E053D521A /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D79B6E8F533952B67F26FBB /* UpdateController.swift */; };
+		7A9039913513F212898A0A63 /* ControlCenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C340DD7D21B3DCB3B71C19 /* ControlCenterTests.swift */; };
 		8042EF084438F50B10D3C220 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E3B32C71D62571D557B72640 /* Sparkle */; };
 		8B7A068950AC9452AD2C2333 /* ProjectScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF76AECCEC2A4030C8476C4 /* ProjectScannerTests.swift */; };
+		9A7314A6DA82773963AE55AC /* HealthCheckService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F098F4441081F56172533CCA /* HealthCheckService.swift */; };
+		9E22B65597E3DFEFFB7E3766 /* ProjectRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44B6D094B9277EECA2E305 /* ProjectRunner.swift */; };
+		A405C265FF3E8A4ACA43AAF4 /* RuntimeMetricsScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186E7D9E158E4657CB2443B4 /* RuntimeMetricsScanner.swift */; };
+		A4D7A05024CA2B86E107A29D /* ServerObserverIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF79407A005442FC58520C48 /* ServerObserverIntents.swift */; };
 		A9134776D598BA6B75BE4820 /* ProjectModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD76634DC2B1BEA7E7EB474B /* ProjectModels.swift */; };
+		A983DA888A0D78C70B72614E /* ActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF439E5E80637CBBCCEE8F29 /* ActivityStore.swift */; };
+		C0E335BA1BCF2D60A5C95034 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BD019658B7D54151034B80 /* NotificationService.swift */; };
 		D17F898AEBE4BF69496EF26E /* WindowModeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CA9EF7C336BAB32CE0E5C2 /* WindowModeController.swift */; };
 		E820385742E66DD1819F9379 /* ServerScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251CB99D0CA10ABB2608F6E4 /* ServerScanner.swift */; };
 		F3BA50962FFC135506EC78F8 /* AppSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4B266E163D4745BC594E2F /* AppSettingsView.swift */; };
@@ -39,12 +51,16 @@
 
 /* Begin PBXFileReference section */
 		0481A45F1330433AAA1C4425 /* ServerDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDashboardView.swift; sourceTree = "<group>"; };
+		09C340DD7D21B3DCB3B71C19 /* ControlCenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlCenterTests.swift; sourceTree = "<group>"; };
 		0E0A3769E4EE5FB92A391AFD /* DockerClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockerClientTests.swift; sourceTree = "<group>"; };
+		16394DE78ED8DAE18A7C27B8 /* ProjectRecipeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectRecipeLoader.swift; sourceTree = "<group>"; };
 		175DCCBC5CDC81AF59CD26FD /* ServerObserver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ServerObserver.entitlements; sourceTree = "<group>"; };
+		186E7D9E158E4657CB2443B4 /* RuntimeMetricsScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeMetricsScanner.swift; sourceTree = "<group>"; };
 		20CC883E9C764CFDB102E593 /* ProjectScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectScanner.swift; sourceTree = "<group>"; };
 		251CB99D0CA10ABB2608F6E4 /* ServerScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerScanner.swift; sourceTree = "<group>"; };
 		29D0778630AF1639708383DA /* ServerObserverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerObserverApp.swift; sourceTree = "<group>"; };
 		2F441AE54F3BA3B107D75274 /* CommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRunner.swift; sourceTree = "<group>"; };
+		472708F3A804E65B57AF3DF9 /* ControlCenterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlCenterModels.swift; sourceTree = "<group>"; };
 		4D79B6E8F533952B67F26FBB /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		4DACA057406FBB7D0BCCEA4C /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		50CA9EF7C336BAB32CE0E5C2 /* WindowModeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowModeController.swift; sourceTree = "<group>"; };
@@ -52,12 +68,20 @@
 		7D8C637184101AE78FB82291 /* ServerObserverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ServerObserverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EB62E1FA42E98F9B50B5140 /* ServerObserverRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ServerObserverRelease.entitlements; sourceTree = "<group>"; };
 		A023A7DA6E5E55087B597CEF /* DockerClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockerClient.swift; sourceTree = "<group>"; };
+		A9BD019658B7D54151034B80 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		BD654AC9A4DD2E12297CBBF3 /* GitInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitInspector.swift; sourceTree = "<group>"; };
+		BED5A4D72E9B8486358C72C3 /* server-observer.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "server-observer.sh"; sourceTree = "<group>"; };
+		C6B72803DCAD22DE84458040 /* PortConflictDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortConflictDetector.swift; sourceTree = "<group>"; };
 		CBF76AECCEC2A4030C8476C4 /* ProjectScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectScannerTests.swift; sourceTree = "<group>"; };
 		D1A1678C31FCCB3D7D7BC09F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DD8F64A5B47AD61031489EC1 /* ServerObserver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ServerObserver.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF79407A005442FC58520C48 /* ServerObserverIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerObserverIntents.swift; sourceTree = "<group>"; };
 		EBE52E54C30AD3A364071FA8 /* ServerScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerScannerTests.swift; sourceTree = "<group>"; };
 		EC4B266E163D4745BC594E2F /* AppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsView.swift; sourceTree = "<group>"; };
 		EC9CD1ECF13BFFF878B2FB39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EF439E5E80637CBBCCEE8F29 /* ActivityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityStore.swift; sourceTree = "<group>"; };
+		F098F4441081F56172533CCA /* HealthCheckService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCheckService.swift; sourceTree = "<group>"; };
+		FA44B6D094B9277EECA2E305 /* ProjectRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectRunner.swift; sourceTree = "<group>"; };
 		FD76634DC2B1BEA7E7EB474B /* ProjectModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -86,9 +110,17 @@
 		142A17C2D2E523BA35909A1B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				EF439E5E80637CBBCCEE8F29 /* ActivityStore.swift */,
 				2F441AE54F3BA3B107D75274 /* CommandRunner.swift */,
 				A023A7DA6E5E55087B597CEF /* DockerClient.swift */,
+				BD654AC9A4DD2E12297CBBF3 /* GitInspector.swift */,
+				F098F4441081F56172533CCA /* HealthCheckService.swift */,
+				A9BD019658B7D54151034B80 /* NotificationService.swift */,
+				C6B72803DCAD22DE84458040 /* PortConflictDetector.swift */,
+				16394DE78ED8DAE18A7C27B8 /* ProjectRecipeLoader.swift */,
+				FA44B6D094B9277EECA2E305 /* ProjectRunner.swift */,
 				20CC883E9C764CFDB102E593 /* ProjectScanner.swift */,
+				186E7D9E158E4657CB2443B4 /* RuntimeMetricsScanner.swift */,
 				251CB99D0CA10ABB2608F6E4 /* ServerScanner.swift */,
 				4D79B6E8F533952B67F26FBB /* UpdateController.swift */,
 			);
@@ -104,6 +136,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		607304410ACB4E9D8E31C1AA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BED5A4D72E9B8486358C72C3 /* server-observer.sh */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		6C4B0EBC066D1521979F0EAA /* ServerObserver */ = {
 			isa = PBXGroup;
 			children = (
@@ -113,6 +153,7 @@
 				D545CA3A2702886977C0D792 /* App */,
 				B85D7A48871FE73FDA9276AD /* Assets */,
 				6F5B6B0AA314FB55776E10CA /* Models */,
+				607304410ACB4E9D8E31C1AA /* Resources */,
 				142A17C2D2E523BA35909A1B /* Services */,
 				09F4A77D6E6D55257A2AD4C4 /* Views */,
 			);
@@ -122,6 +163,7 @@
 		6F5B6B0AA314FB55776E10CA /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				472708F3A804E65B57AF3DF9 /* ControlCenterModels.swift */,
 				5CAE242C621B58D1EB878532 /* LocalServer.swift */,
 				FD76634DC2B1BEA7E7EB474B /* ProjectModels.swift */,
 			);
@@ -148,6 +190,7 @@
 		CDD16D928331BDBB4D34CE24 /* ServerObserverTests */ = {
 			isa = PBXGroup;
 			children = (
+				09C340DD7D21B3DCB3B71C19 /* ControlCenterTests.swift */,
 				0E0A3769E4EE5FB92A391AFD /* DockerClientTests.swift */,
 				CBF76AECCEC2A4030C8476C4 /* ProjectScannerTests.swift */,
 				EBE52E54C30AD3A364071FA8 /* ServerScannerTests.swift */,
@@ -160,6 +203,7 @@
 			children = (
 				4DACA057406FBB7D0BCCEA4C /* AppState.swift */,
 				29D0778630AF1639708383DA /* ServerObserverApp.swift */,
+				DF79407A005442FC58520C48 /* ServerObserverIntents.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -252,6 +296,7 @@
 			files = (
 				011B99A9D9D66014EA3B3F04 /* AppIcon.icon in Resources */,
 				4EC55B6B39C9C98B99788F25 /* Assets.xcassets in Resources */,
+				697C5D1E562D427167353D24 /* server-observer.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -262,15 +307,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A983DA888A0D78C70B72614E /* ActivityStore.swift in Sources */,
 				F3BA50962FFC135506EC78F8 /* AppSettingsView.swift in Sources */,
 				530FEDCE46743A89506C70CF /* AppState.swift in Sources */,
 				0DB23DA19E0F985ABDE7F38F /* CommandRunner.swift in Sources */,
+				650E4FBD2C54D64CD8FE9818 /* ControlCenterModels.swift in Sources */,
 				FDC200C0A2BA47BF9C27AD6F /* DockerClient.swift in Sources */,
+				5ACC926DCDC421FFB061613B /* GitInspector.swift in Sources */,
+				9A7314A6DA82773963AE55AC /* HealthCheckService.swift in Sources */,
 				1D93862537F041831E089DCD /* LocalServer.swift in Sources */,
+				C0E335BA1BCF2D60A5C95034 /* NotificationService.swift in Sources */,
+				31DB6768222AD9D8F5AABE58 /* PortConflictDetector.swift in Sources */,
 				A9134776D598BA6B75BE4820 /* ProjectModels.swift in Sources */,
+				0A322065C6411BA62989377E /* ProjectRecipeLoader.swift in Sources */,
+				9E22B65597E3DFEFFB7E3766 /* ProjectRunner.swift in Sources */,
 				735A1B589575D16A4138346A /* ProjectScanner.swift in Sources */,
+				A405C265FF3E8A4ACA43AAF4 /* RuntimeMetricsScanner.swift in Sources */,
 				4FEB4368B72F3FDD4C6ACFF4 /* ServerDashboardView.swift in Sources */,
 				628183641A06C0DDC326582A /* ServerObserverApp.swift in Sources */,
+				A4D7A05024CA2B86E107A29D /* ServerObserverIntents.swift in Sources */,
 				E820385742E66DD1819F9379 /* ServerScanner.swift in Sources */,
 				792FC7950DE85D2E053D521A /* UpdateController.swift in Sources */,
 				D17F898AEBE4BF69496EF26E /* WindowModeController.swift in Sources */,
@@ -281,6 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A9039913513F212898A0A63 /* ControlCenterTests.swift in Sources */,
 				507E314B192DDCD67F71DBCA /* DockerClientTests.swift in Sources */,
 				8B7A068950AC9452AD2C2333 /* ProjectScannerTests.swift in Sources */,
 				290719D8996D928287134048 /* ServerScannerTests.swift in Sources */,
@@ -305,14 +361,14 @@
 				CODE_SIGN_ENTITLEMENTS = ServerObserver/ServerObserverRelease.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ServerObserver/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.serverobserver.app;
 				PRODUCT_NAME = ServerObserver;
 				SDKROOT = macosx;
@@ -468,14 +524,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ServerObserver/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.serverobserver.app;
 				PRODUCT_NAME = ServerObserver;
 				SDKROOT = macosx;

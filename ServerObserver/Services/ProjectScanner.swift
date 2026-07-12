@@ -60,13 +60,15 @@ actor ProjectScanner {
         guard !markers.isEmpty else { return }
         let hasStrongMarker = markers.contains(where: \.isStrongProjectBoundary)
         guard hasStrongMarker || depth <= 2 else { return }
+        let recipe = ProjectRecipeLoader.load(at: url, markers: markers)
 
         projects.append(
             ProjectDescriptor(
                 path: PathUtilities.normalized(url.path),
-                name: projectName(at: url),
+                name: recipe.displayName ?? projectName(at: url),
                 rootID: root.id,
-                markers: markers
+                markers: markers,
+                recipe: recipe
             )
         )
     }
@@ -115,7 +117,8 @@ actor ProjectScanner {
                 path: first.path,
                 name: first.name,
                 rootID: first.rootID,
-                markers: entries.reduce(into: Set<ProjectMarker>()) { $0.formUnion($1.markers) }
+                markers: entries.reduce(into: Set<ProjectMarker>()) { $0.formUnion($1.markers) },
+                recipe: first.recipe
             )
         }
 

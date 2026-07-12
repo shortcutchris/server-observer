@@ -39,6 +39,7 @@ struct ServerDashboardView: View {
         .serverStopDialogs()
         .containerStopDialog()
         .projectStopDialog()
+        .automationDialog()
         .appErrorAlert()
     }
 }
@@ -194,12 +195,7 @@ private struct ProjectCard: View {
                 Button("Finder", systemImage: "folder") { appState.reveal(project) }
                     .controlSize(.small)
                 Spacer()
-                if project.isActive {
-                    Button("Alles stoppen", systemImage: "stop.fill", role: .destructive) {
-                        appState.requestStop(project)
-                    }
-                    .controlSize(.small)
-                }
+                ProjectActionButtons(project: project, compact: true)
             }
         }
         .padding(13)
@@ -288,6 +284,9 @@ private struct ServerRuntimeRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                if let metrics = server.metrics {
+                    RuntimeMetricsLine(metrics: metrics)
+                }
             }
             Spacer()
             if server.browserURL != nil {
@@ -334,6 +333,9 @@ private struct ContainerRuntimeRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                if let metrics = container.metrics {
+                    RuntimeMetricsLine(metrics: metrics)
+                }
             }
             Spacer()
             if appState.busyContainerIDs.contains(container.id) {
@@ -404,6 +406,67 @@ private struct RuntimePill: View {
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
             .background(color.opacity(0.1), in: Capsule())
+    }
+}
+
+private struct RuntimeMetricsLine: View {
+    let metrics: RuntimeMetrics
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Label(metrics.cpuLabel, systemImage: "cpu")
+            Label(metrics.memoryLabel, systemImage: "memorychip")
+            if let uptime = metrics.uptimeLabel { Label(uptime, systemImage: "clock") }
+            if let network = metrics.networkLabel { Text(network) }
+        }
+        .font(.caption2)
+        .foregroundStyle(.tertiary)
+        .lineLimit(1)
+    }
+}
+
+private struct ProjectActionButtons: View {
+    @EnvironmentObject private var appState: AppState
+    let project: MonitoredProject
+    var compact = false
+
+    private var state: ProjectActionState { appState.actionStates[project.id] ?? .idle }
+
+    var body: some View {
+        HStack(spacing: 7) {
+            if state.isBusy {
+                ProgressView().controlSize(.small)
+            } else {
+                if project.descriptor.recipe.canStart {
+                    if project.descriptor.recipe.profiles.isEmpty {
+                        Button(project.isActive ? "Neustart" : "Starten", systemImage: project.isActive ? "arrow.clockwise" : "play.fill") {
+                            project.isActive ? appState.restart(project) : appState.start(project)
+                        }
+                    } else {
+                        Menu {
+                            if project.isActive {
+                                Button("Aktuelles Setup neu starten") { appState.restart(project) }
+                            } else {
+                                Button("Standard") { appState.start(project) }
+                            }
+                            Divider()
+                            ForEach(project.descriptor.recipe.profiles) { profile in
+                                Button("Profil: \(profile.name)") { appState.start(project, profile: profile) }
+                            }
+                        } label: {
+                            Label(project.isActive ? "Neustart" : "Starten", systemImage: project.isActive ? "arrow.clockwise" : "play.fill")
+                        }
+                    }
+                }
+                if project.isActive {
+                    Button("Stoppen", systemImage: "stop.fill", role: .destructive) {
+                        appState.requestStop(project)
+                    }
+                }
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(compact ? .small : .regular)
     }
 }
 
@@ -490,6 +553,12 @@ private struct ProjectSidebarRow: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
+            if !project.portConflicts.isEmpty {
+                Image(systemName: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(.orange)
+            }
+            if project.serviceHealth.contains(where: { $0.state == .unreachable || $0.state == .degraded }) {
+                Image(systemName: "heart.slash.fill").font(.caption).foregroundStyle(.red)
+            }
             if project.webCount > 0 {
                 Image(systemName: "globe").font(.caption).foregroundStyle(.green)
                 Text(String(project.webCount)).font(.caption).foregroundStyle(.secondary)
@@ -504,42 +573,262 @@ private struct ProjectSidebarRow: View {
 private struct ProjectDetailView: View {
     @EnvironmentObject private var appState: AppState
     let project: MonitoredProject
+    @State private var tab: DetailTab = .overview
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 14) {
                 ProjectHeader(project: project)
 
                 HStack {
                     Button("Im Finder", systemImage: "folder") { appState.reveal(project) }
                     Spacer()
-                    if project.isActive {
-                        Button("Alles stoppen", systemImage: "stop.fill", role: .destructive) {
-                            appState.requestStop(project)
+                    ProjectActionButtons(project: project)
+                }
+
+                Picker("Ansicht", selection: $tab) {
+                    ForEach(DetailTab.allCases) { value in
+                        Label(value.title, systemImage: value.symbol).tag(value)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .padding(18)
+            Divider()
+
+            Group {
+                switch tab {
+                case .overview: ProjectOverviewView(project: project)
+                case .logs: ProjectLogsView(project: project)
+                case .history: ProjectHistoryView(project: project)
+                }
+            }
+        }
+        .background(.background.opacity(0.28))
+        .onChange(of: tab) { _, value in
+            if value == .logs { appState.loadLogs(for: project) }
+        }
+    }
+}
+
+private enum DetailTab: String, CaseIterable, Identifiable {
+    case overview
+    case logs
+    case history
+    var id: Self { self }
+    var title: String {
+        switch self { case .overview: "Übersicht"; case .logs: "Logs"; case .history: "Verlauf" }
+    }
+    var symbol: String {
+        switch self { case .overview: "gauge.with.dots.needle.33percent"; case .logs: "text.alignleft"; case .history: "clock.arrow.circlepath" }
+    }
+}
+
+private struct ProjectOverviewView: View {
+    let project: MonitoredProject
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 125), spacing: 8)], spacing: 8) {
+                    StatusTile(title: "CPU", value: aggregate.cpuLabel, symbol: "cpu", color: .blue)
+                    StatusTile(title: "Speicher", value: aggregate.memoryLabel, symbol: "memorychip", color: .purple)
+                    StatusTile(title: "Laufzeiten", value: String(project.activeRuntimeCount), symbol: "waveform.path.ecg", color: .green)
+                    StatusTile(title: "Health", value: healthSummary, symbol: "heart.text.square", color: healthColor)
+                }
+
+                if let git = project.gitStatus {
+                    RuntimeSection(title: "Git", count: git.changedFileCount) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Label(git.summary, systemImage: "arrow.triangle.branch")
+                                .font(.callout.weight(.medium))
+                            if let commit = git.latestCommit {
+                                Text(commit).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(11)
+                        .background(.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8))
+                    }
+                }
+
+                if !project.serviceHealth.isEmpty {
+                    RuntimeSection(title: "Services & Healthchecks", count: project.serviceHealth.count) {
+                        ForEach(project.serviceHealth) { health in HealthRow(health: health) }
+                    }
+                }
+
+                if !project.portConflicts.isEmpty {
+                    RuntimeSection(title: "Portkonflikte", count: project.portConflicts.count) {
+                        ForEach(project.portConflicts) { conflict in
+                            Label(
+                                "Port \(conflict.port) ist durch \(conflict.occupiedBy) belegt",
+                                systemImage: "exclamationmark.triangle.fill"
+                            )
+                            .font(.callout)
+                            .foregroundStyle(.orange)
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
                         }
                     }
                 }
-                .buttonStyle(.bordered)
 
                 RuntimeSection(title: "Lokale Prozesse", count: project.servers.count) {
-                    if project.servers.isEmpty {
-                        SectionEmptyText(text: "Keine lokalen Prozesse zugeordnet")
-                    } else {
-                        ForEach(project.servers) { ServerRuntimeRow(server: $0) }
-                    }
+                    if project.servers.isEmpty { SectionEmptyText(text: "Keine lokalen Prozesse zugeordnet") }
+                    else { ForEach(project.servers) { ServerRuntimeRow(server: $0) } }
                 }
 
                 RuntimeSection(title: "Docker & Dev Containers", count: project.containers.count) {
-                    if project.containers.isEmpty {
-                        SectionEmptyText(text: "Keine Container zugeordnet")
-                    } else {
-                        ForEach(project.containers) { ContainerRuntimeRow(container: $0) }
-                    }
+                    if project.containers.isEmpty { SectionEmptyText(text: "Keine Container zugeordnet") }
+                    else { ForEach(project.containers) { ContainerRuntimeRow(container: $0) } }
                 }
+
+                RecipeSummaryView(recipe: project.descriptor.recipe)
             }
             .padding(18)
         }
-        .background(.background.opacity(0.28))
+    }
+
+    private var aggregate: RuntimeMetrics {
+        let metrics = project.servers.compactMap(\.metrics) + project.containers.compactMap(\.metrics)
+        return RuntimeMetrics(
+            cpuPercent: metrics.reduce(0) { $0 + $1.cpuPercent },
+            memoryBytes: metrics.reduce(0) { $0 + $1.memoryBytes },
+            uptimeSeconds: metrics.compactMap(\.uptimeSeconds).max(),
+            networkInputBytes: metrics.compactMap(\.networkInputBytes).reduce(0, +),
+            networkOutputBytes: metrics.compactMap(\.networkOutputBytes).reduce(0, +),
+            processCount: metrics.compactMap(\.processCount).reduce(0, +)
+        )
+    }
+
+    private var unhealthy: Int { project.serviceHealth.filter { $0.state != .healthy }.count }
+    private var healthSummary: String { project.serviceHealth.isEmpty ? "–" : (unhealthy == 0 ? "OK" : "\(unhealthy) Fehler") }
+    private var healthColor: Color { unhealthy == 0 ? .green : .red }
+}
+
+private struct StatusTile: View {
+    let title: String
+    let value: String
+    let symbol: String
+    let color: Color
+    var body: some View {
+        HStack(spacing: 9) {
+            Image(systemName: symbol).foregroundStyle(color).frame(width: 23)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(value).font(.headline).lineLimit(1)
+                Text(title).font(.caption2).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .background(color.opacity(0.075), in: RoundedRectangle(cornerRadius: 9))
+    }
+}
+
+private struct HealthRow: View {
+    let health: ServiceHealth
+    var body: some View {
+        HStack(spacing: 9) {
+            Circle().fill(color).frame(width: 8, height: 8)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(health.name).font(.callout.weight(.medium))
+                Text(health.url).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+            }
+            Spacer()
+            Text(detail).font(.caption).foregroundStyle(color)
+        }
+        .padding(10)
+        .background(.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8))
+    }
+    private var detail: String {
+        var value = health.statusCode.map(String.init) ?? health.state.label
+        if let latency = health.latencyMilliseconds { value += " · \(latency) ms" }
+        return value
+    }
+    private var color: Color {
+        switch health.state { case .healthy: .green; case .degraded: .orange; case .unreachable: .red; case .unknown: .secondary }
+    }
+}
+
+private struct RecipeSummaryView: View {
+    let recipe: ProjectRecipe
+    var body: some View {
+        RuntimeSection(title: "Projektsteuerung", count: recipe.profiles.count) {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(recipe.source == .configuration ? ".server-observer.yml" : "Automatisch erkannt", systemImage: "terminal")
+                    .font(.callout.weight(.medium))
+                if let command = recipe.startCommand { Text("$ \(command)").font(.caption.monospaced()).textSelection(.enabled) }
+                if !recipe.allExpectedPorts.isEmpty { Text("Erwartete Ports: \(recipe.allExpectedPorts.map(String.init).joined(separator: ", "))").font(.caption).foregroundStyle(.secondary) }
+            }
+            .padding(11)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8))
+        }
+    }
+}
+
+private struct ProjectLogsView: View {
+    @EnvironmentObject private var appState: AppState
+    let project: MonitoredProject
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                if let snapshot = appState.projectLogs[project.id] {
+                    Text(snapshot.sourceLabel).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                } else { Text("Logs werden geladen …").font(.caption).foregroundStyle(.secondary) }
+                Spacer()
+                Button("Aktualisieren", systemImage: "arrow.clockwise") { appState.loadLogs(for: project) }
+                    .buttonStyle(.borderless)
+            }
+            .padding(12)
+            Divider()
+            ScrollView([.horizontal, .vertical]) {
+                Text(appState.projectLogs[project.id]?.text ?? "")
+                    .font(.system(.caption, design: .monospaced))
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding(14)
+            }
+            .background(Color(nsColor: .textBackgroundColor).opacity(0.55))
+        }
+        .task { appState.loadLogs(for: project) }
+    }
+}
+
+private struct ProjectHistoryView: View {
+    @EnvironmentObject private var appState: AppState
+    let project: MonitoredProject
+    private var events: [ActivityEvent] { appState.activity.filter { $0.projectPath == project.id } }
+    var body: some View {
+        ScrollView {
+            if events.isEmpty {
+                ContentUnavailableView("Noch kein Verlauf", systemImage: "clock", description: Text("Starts, Stops, Fehler und Health-Änderungen erscheinen hier."))
+                    .padding(.top, 50)
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(events) { event in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: symbol(event.kind)).foregroundStyle(color(event.kind)).frame(width: 18)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(event.message).font(.callout)
+                                Text(event.date.formatted(date: .abbreviated, time: .shortened)).font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 10)
+                        Divider()
+                    }
+                }
+                .padding(.horizontal, 18)
+            }
+        }
+    }
+    private func symbol(_ kind: ActivityEvent.Kind) -> String {
+        switch kind { case .started: "play.fill"; case .stopped: "stop.fill"; case .restarted: "arrow.clockwise"; case .unhealthy: "heart.slash"; case .recovered: "heart.fill"; case .portConflict: "exclamationmark.triangle"; case .error: "xmark.octagon"; case .info: "info.circle" }
+    }
+    private func color(_ kind: ActivityEvent.Kind) -> Color {
+        switch kind { case .started, .recovered: .green; case .unhealthy, .error: .red; case .portConflict: .orange; default: .secondary }
     }
 }
 
@@ -674,8 +963,32 @@ private extension View {
     func projectStopDialog() -> some View {
         modifier(ProjectStopDialogModifier())
     }
+    func automationDialog() -> some View {
+        modifier(AutomationDialogModifier())
+    }
     func appErrorAlert() -> some View {
         modifier(AppErrorAlertModifier())
+    }
+}
+
+private struct AutomationDialogModifier: ViewModifier {
+    @EnvironmentObject private var appState: AppState
+    func body(content: Content) -> some View {
+        content.confirmationDialog(
+            "Externe Projektaktion bestätigen",
+            isPresented: Binding(
+                get: { appState.automationRequest != nil },
+                set: { if !$0 { appState.automationRequest = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            if let request = appState.automationRequest {
+                Button("„\(request.projectName)“ \(request.action.title)") { appState.confirmAutomation() }
+                Button("Abbrechen", role: .cancel) { appState.automationRequest = nil }
+            }
+        } message: {
+            Text("Diese Anfrage kam über URL, CLI oder Apple Kurzbefehle. Der konfigurierte Projektbefehl wird erst nach deiner Bestätigung ausgeführt.")
+        }
     }
 }
 

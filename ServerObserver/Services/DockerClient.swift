@@ -85,6 +85,67 @@ actor DockerClient {
         _ = try await CommandRunner.run(executable, arguments: ["start", containerID])
     }
 
+    func metrics(containerIDs: [String]) async -> [String: RuntimeMetrics] {
+        guard let executable, !containerIDs.isEmpty else { return [:] }
+        do {
+            let output = try await CommandRunner.run(
+                executable,
+                arguments: ["stats", "--no-stream", "--format", "{{json .}}"] + containerIDs
+            )
+            return Self.parseStats(output, requestedIDs: containerIDs)
+        } catch {
+            return [:]
+        }
+    }
+
+    nonisolated static func parseStats(_ output: String, requestedIDs: [String]) -> [String: RuntimeMetrics] {
+        var result: [String: RuntimeMetrics] = [:]
+        for line in output.split(whereSeparator: \Character.isNewline) {
+            guard
+                let data = String(line).data(using: .utf8),
+                let record = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+            else { continue }
+            let rawID = record["ID"] as? String ?? record["Container"] as? String ?? ""
+            guard let id = requestedIDs.first(where: { $0.hasPrefix(rawID) || rawID.hasPrefix(String($0.prefix(12))) }) else {
+                continue
+            }
+            let memory = parseByteCount((record["MemUsage"] as? String ?? "0").components(separatedBy: "/").first ?? "0")
+            let networkParts = (record["NetIO"] as? String ?? "").components(separatedBy: "/")
+            result[id] = RuntimeMetrics(
+                cpuPercent: parsePercent(record["CPUPerc"] as? String),
+                memoryBytes: memory,
+                uptimeSeconds: nil,
+                networkInputBytes: networkParts.first.map(parseByteCount),
+                networkOutputBytes: networkParts.count > 1 ? parseByteCount(networkParts[1]) : nil,
+                processCount: Int((record["PIDs"] as? String ?? "").trimmingCharacters(in: .whitespaces))
+            )
+        }
+        return result
+    }
+
+    private nonisolated static func parsePercent(_ value: String?) -> Double {
+        Double((value ?? "0").replacingOccurrences(of: "%", with: "").trimmingCharacters(in: .whitespaces)) ?? 0
+    }
+
+    private nonisolated static func parseByteCount(_ raw: String) -> UInt64 {
+        let value = raw.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
+        let number = Double(value.prefix { $0.isNumber || $0 == "." }) ?? 0
+        let unit = value.lowercased().filter { $0.isLetter }
+        let factor: Double = switch unit {
+        case "b": 1
+        case "kb": 1_000
+        case "kib": 1_024
+        case "mb": 1_000_000
+        case "mib": 1_048_576
+        case "gb": 1_000_000_000
+        case "gib": 1_073_741_824
+        case "tb": 1_000_000_000_000
+        case "tib": 1_099_511_627_776
+        default: 1
+        }
+        return UInt64(max(number * factor, 0))
+    }
+
     nonisolated static func parseInspectJSON(
         _ data: Data,
         projects: [ProjectDescriptor]

@@ -37,6 +37,7 @@ struct LocalServer: Identifiable, Hashable, Sendable {
     let kind: Kind
     let isHTTP: Bool
     let ownerUID: UInt32
+    var metrics: RuntimeMetrics? = nil
 
     var id: Int32 { pid }
     var primaryPort: Int { ports.first ?? 0 }
