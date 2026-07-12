@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 – 2026-07-12
+
+- Fensterverhalten direkt im Hauptmenü auswählbar
+- kein zusätzliches Untermenü mehr für Desktop-, Vordergrund- und Normalmodus
+- aktive Auswahl weiterhin eindeutig mit einem Häkchen markiert
+
 ## 0.3.1 – 2026-07-12
 
 - zentraler „Frontend öffnen“-Button auf Projektkarten und in der Detailansicht

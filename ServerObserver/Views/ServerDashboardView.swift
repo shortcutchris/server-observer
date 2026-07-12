@@ -78,9 +78,18 @@ private struct DashboardHeader: View {
                 .help("Projektordner verwalten")
 
                 Menu {
-                    Picker("Fensterverhalten", selection: $panelMode) {
-                        ForEach(PanelMode.allCases) { mode in
-                            Label(mode.title, systemImage: mode.symbol).tag(mode)
+                    ForEach(PanelMode.allCases) { mode in
+                        Toggle(
+                            isOn: Binding(
+                                get: { panelMode == mode },
+                                set: { isSelected in
+                                    if isSelected {
+                                        panelMode = mode
+                                    }
+                                }
+                            )
+                        ) {
+                            Label(mode.title, systemImage: mode.symbol)
                         }
                     }
                 } label: {
