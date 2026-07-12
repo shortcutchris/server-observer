@@ -44,6 +44,7 @@ Server Observer ordnet lokale TCP-Prozesse und Docker-Container automatisch den 
 | 🗂️ | **Automatische Projektzuordnung** | Git-, Compose-, Dev-Container- und Sprachprojekte werden erkannt und mit ihren Laufzeiten gruppiert. |
 | 🟢 | **Server- und Containerübersicht** | Lokale Webserver, Datenbanken, Worker und Container ohne veröffentlichten Webport bleiben sichtbar. |
 | ▶️ | **Start, Stop und Neustart** | Projekte, Profile, Prozesse und Docker-Container direkt aus Panel oder Menüleiste steuern. |
+| 🌐 | **Frontend mit einem Klick** | Das bevorzugte Projekt-Frontend direkt öffnen oder ein gestopptes Projekt starten und nach dem Healthcheck öffnen. |
 | 📊 | **Live-Metriken** | CPU, Arbeitsspeicher, Netzwerkvolumen, Prozessanzahl und Laufzeit im Blick behalten. |
 | ❤️ | **Healthchecks** | Konfigurierte Services oder erkannte Webserver regelmäßig lokal prüfen. |
 | ⚠️ | **Intelligente Portkonflikte** | Sehen, welcher fremde Prozess einen erwarteten Projektport bereits belegt. |
@@ -90,6 +91,7 @@ Nach dem ersten Start:
 2. Füge einen oder mehrere Ordner hinzu, unter denen deine Repositories liegen.
 3. Passe bei großen Verzeichnisbäumen die Scan-Tiefe an.
 4. Wähle im Dashboard **Alle Projekte**, um auch gestoppte Projekte zu sehen.
+5. Öffne das erkannte Frontend direkt über **Frontend öffnen** beziehungsweise **Starten & öffnen**.
 
 Docker ist optional. Wenn die Docker CLI verfügbar und die Engine gestartet ist, erscheinen Container automatisch neben lokalen Prozessen.
 
@@ -119,11 +121,14 @@ services:
   Web App:
     url: http://localhost:3000
     health: http://localhost:3000/api/health
+    frontend: true
   Admin UI:
     url: http://localhost:8080
 ```
 
 Eine kommentierte Vorlage liegt in [`.server-observer.example.yml`](.server-observer.example.yml). Externe Aktionen über URL, CLI oder Apple Kurzbefehle verlangen vor der Ausführung eine sichtbare Bestätigung in der App.
+
+Bei mehreren Services markiert `frontend: true` das bevorzugte Ziel. Ohne Markierung zeigt der Frontend-Button alle konfigurierten und automatisch erkannten Weboberflächen als Auswahl an.
 
 ## CLI und Kurzbefehle
 

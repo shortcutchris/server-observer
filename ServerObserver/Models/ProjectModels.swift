@@ -195,6 +195,45 @@ struct MonitoredProject: Identifiable, Hashable, Sendable {
     var webCount: Int {
         servers.filter { $0.kind == .web }.count + containers.filter { $0.kind == .web && $0.isRunning }.count
     }
+
+    var browserTargets: [ProjectBrowserTarget] {
+        let configured = descriptor.recipe.services.compactMap { service -> ProjectBrowserTarget? in
+            guard let url = service.browserURL else { return nil }
+            return ProjectBrowserTarget(
+                name: service.name,
+                url: url,
+                source: .configuration,
+                isPreferred: service.isFrontend == true
+            )
+        }
+        let local = servers.compactMap { server -> ProjectBrowserTarget? in
+            guard let url = server.browserURL else { return nil }
+            return ProjectBrowserTarget(
+                name: server.displayName,
+                url: url,
+                source: .localProcess,
+                isPreferred: false
+            )
+        }
+        let docker = containers.compactMap { container -> ProjectBrowserTarget? in
+            guard let url = container.browserURL else { return nil }
+            return ProjectBrowserTarget(
+                name: container.displayName,
+                url: url,
+                source: .docker,
+                isPreferred: false
+            )
+        }
+
+        var seen = Set<String>()
+        return (configured.sorted { $0.isPreferred && !$1.isPreferred } + local + docker).filter {
+            seen.insert($0.normalizedURL).inserted
+        }
+    }
+
+    var primaryBrowserTarget: ProjectBrowserTarget? {
+        browserTargets.first(where: \.isPreferred) ?? browserTargets.first
+    }
 }
 
 enum PathUtilities {

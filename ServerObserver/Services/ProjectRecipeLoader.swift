@@ -123,12 +123,14 @@ enum ProjectRecipeLoader {
                     currentService = ProjectService(
                         name: String(line.dropLast()).trimmingCharacters(in: .whitespaces),
                         url: "",
-                        healthURL: nil
+                        healthURL: nil,
+                        isFrontend: nil
                     )
                 } else if let (key, value) = split(line), currentService != nil {
                     switch key.lowercased() {
                     case "url": currentService?.url = value
                     case "health": currentService?.healthURL = nonEmpty(value)
+                    case "frontend", "primary": currentService?.isFrontend = parseBoolean(value)
                     default: continue
                     }
                 }
