@@ -43,7 +43,9 @@ jobs:
         run: |
           VERSION="${{ inputs.tag }}"
           VERSION="${VERSION#v}"
-          scripts/build_release.sh "$VERSION" "$GITHUB_RUN_NUMBER"
+          BUILD_NUMBER="$(sed -n 's/^[[:space:]]*CURRENT_PROJECT_VERSION:[[:space:]]*//p' project.yml | head -1)"
+          test -n "$BUILD_NUMBER"
+          scripts/build_release.sh "$VERSION" "$BUILD_NUMBER"
 
       - name: Notarize and staple
         env:
@@ -81,8 +83,13 @@ jobs:
           mkdir release-feed
           cp "dist/ServerObserver-$VERSION.zip" release-feed/
           cp appcast.xml release-feed/appcast.xml
-          printf '# Server Observer %s\n\nSiehe GitHub Release Notes.\n' "$VERSION" \
-            > "release-feed/ServerObserver-$VERSION.md"
+          NOTES_SOURCE="release-notes/$VERSION.md"
+          if [[ -f "$NOTES_SOURCE" ]]; then
+            cp "$NOTES_SOURCE" "release-feed/ServerObserver-$VERSION.md"
+          else
+            printf '# Server Observer %s\n\nNeue Version von Server Observer.\n' "$VERSION" \
+              > "release-feed/ServerObserver-$VERSION.md"
+          fi
           echo "$SPARKLE_PRIVATE_KEY" | "$TOOLS/generate_appcast" \
             --ed-key-file - \
             --download-url-prefix "https://github.com/shortcutchris/server-observer/releases/download/${{ inputs.tag }}/" \
@@ -98,11 +105,21 @@ jobs:
         run: |
           VERSION="${{ inputs.tag }}"
           VERSION="${VERSION#v}"
-          gh release create "${{ inputs.tag }}" \
-            "dist/ServerObserver-$VERSION.zip" \
-            "release-feed/ServerObserver-$VERSION.md" \
-            --title "Server Observer $VERSION" \
-            --generate-notes
+          if gh release view "${{ inputs.tag }}" >/dev/null 2>&1; then
+            gh release upload "${{ inputs.tag }}" \
+              "dist/ServerObserver-$VERSION.zip" \
+              "release-feed/ServerObserver-$VERSION.md" \
+              --clobber
+            gh release edit "${{ inputs.tag }}" \
+              --title "Server Observer $VERSION" \
+              --notes-file "release-feed/ServerObserver-$VERSION.md"
+          else
+            gh release create "${{ inputs.tag }}" \
+              "dist/ServerObserver-$VERSION.zip" \
+              "release-feed/ServerObserver-$VERSION.md" \
+              --title "Server Observer $VERSION" \
+              --notes-file "release-feed/ServerObserver-$VERSION.md"
+          fi
 
       - name: Publish appcast on main
         run: |
